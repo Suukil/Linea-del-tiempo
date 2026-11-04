@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Línea del tiempo</title>
+<style>
+:root{--bg:#e9eef2;--panel:#f8fafb;--ink:#17222d;--mute:#5d6b79;--line:#1f4e5f;--rule:#c9d3db;--card:#fff;--accent:#1f4e5f}
+@media (prefers-color-scheme:dark){:root{--bg:#10171d;--panel:#18222b;--ink:#e6edf2;--mute:#92a1ae;--line:#6fb3c9;--rule:#2b3a46;--card:#1d2933;--accent:#6fb3c9}}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 "Segoe UI",system-ui,sans-serif;display:grid;grid-template-columns:310px 1fr;grid-template-rows:auto 1fr}
+header{grid-column:1/3;display:flex;gap:10px 14px;align-items:center;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--rule);flex-wrap:wrap}
+h1{font:600 21px Georgia,"Iowan Old Style",serif;margin:0;margin-right:auto}
+#range,#sync{color:var(--mute);font-size:13px}
+.search{display:flex;gap:6px;align-items:center;flex:1 1 280px;max-width:520px}
+.search input{flex:1;min-width:0}
+input,textarea,button{font:inherit;color:inherit}
+input[type=text],input[type=number],input[type=search],textarea{width:100%;padding:8px 10px;border:1px solid var(--rule);border-radius:6px;background:var(--card)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button{padding:8px 14px;border:1px solid var(--rule);border-radius:6px;background:var(--card);cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.main{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:600}
+button.danger{color:#b3261e}
+#count{color:var(--mute);min-width:84px;font-size:13px}
+#newb,#x{display:none}
+aside{padding:18px 20px;background:var(--panel);border-right:1px solid var(--rule);overflow:auto}
+aside h2{font:600 16px Georgia,serif;margin:0 0 12px}
+label{display:block;margin:12px 0 4px;color:var(--mute);font-size:13px}
+textarea{min-height:130px;resize:vertical}
+.sw{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sw button{width:32px;height:32px;padding:0;border-radius:50%;border:2px solid transparent}
+.sw button[aria-pressed=true]{border-color:var(--ink);box-shadow:0 0 0 2px var(--panel) inset}
+.sw input[type=color]{width:36px;height:32px;padding:0;border:1px solid var(--rule);border-radius:6px;background:none}
+.row{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.tools{margin-top:22px;padding-top:14px;border-top:1px solid var(--rule)}
+#legend{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+#legend button{padding:3px 10px;font-size:13px;border-radius:99px;display:flex;gap:6px;align-items:center}
+#legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
+#legend button[aria-pressed=true]{border-color:var(--ink);font-weight:600}
+main{overflow:auto;padding:24px 16px 40px}
+.board{display:flex;min-width:max-content}
+.col{width:250px;flex:none;position:relative;padding-top:46px}
+.col::before{content:"";position:absolute;top:13px;left:0;right:0;height:4px;background:var(--line)}
+.col.first::before{left:50%}.col.last::before{right:50%}.col.first.last::before{display:none}
+.col .dot{position:absolute;top:6px;left:50%;width:18px;height:18px;margin-left:-9px;border-radius:50%;background:var(--bg);border:4px solid var(--line)}
+.col .yr{position:absolute;top:-14px;left:0;right:0;text-align:center;font:700 19px Georgia,serif;font-variant-numeric:tabular-nums}
+.card{position:relative;z-index:1;margin:0 10px 12px;padding:10px 12px 11px;background:var(--card);border:1px solid var(--rule);border-left:7px solid var(--c);border-radius:8px;cursor:pointer;transition:opacity .15s}
+.card h3{margin:0 0 4px;font:600 15px/1.3 Georgia,serif}
+.card p{margin:0;color:var(--mute);font-size:13.5px;white-space:pre-wrap;overflow-wrap:anywhere}
+.card.dim{opacity:.22}
+.card.hit{box-shadow:0 0 0 3px var(--c)}
+.card.cur{box-shadow:0 0 0 3px var(--ink)}
+.empty{max-width:420px;margin:60px auto;text-align:center;color:var(--mute)}
+dialog{border:1px solid var(--rule);border-radius:10px;background:var(--panel);color:var(--ink);width:min(480px,92vw);padding:18px 20px}
+dialog h2{font:600 17px Georgia,serif;margin:0 0 8px}
+dialog p{margin:6px 0;color:var(--mute);font-size:13.5px;overflow-wrap:anywhere}
+@media(max-width:800px){
+  body{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+  header{grid-column:1}
+  #newb{display:inline-block}
+  aside{display:none;position:fixed;inset:0;z-index:20;border:0}
+  body.open aside{display:block}
+  #x{display:inline-block;float:right}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Línea del tiempo</h1>
+  <span id="range"></span>
+  <div class="search" role="search">
+    <input type="search" id="q" placeholder="Buscar por palabras clave" aria-label="Buscar eventos">
+    <button id="prev" aria-label="Resultado anterior">▲</button>
+    <button id="next" aria-label="Resultado siguiente">▼</button>
+    <span id="count" aria-live="polite"></span>
+  </div>
+  <button id="cloud">☁ Drive</button>
+  <span id="sync"></span>
+  <button class="main" id="newb">＋ Evento</button>
+</header>
+
+<aside>
+  <button id="x" aria-label="Cerrar formulario">✕</button>
+  <h2 id="ftitle">Nuevo evento</h2>
+  <label for="year">Año (número negativo para a. C.)</label>
+  <input type="number" id="year" step="1" inputmode="numeric" placeholder="Ej. 1492">
+  <label for="title">Título</label>
+  <input type="text" id="title" maxlength="80" placeholder="Ej. Llegada a América">
+  <label for="text">Qué pasó</label>
+  <textarea id="text" placeholder="Describe el hecho importante"></textarea>
+  <label>Color del tema</label>
+  <div class="sw" id="sw"></div>
+  <div class="row">
+    <button class="main" id="save">Agregar evento</button>
+    <button id="cancel" hidden>Cancelar</button>
+    <button class="danger" id="del" hidden>Eliminar</button>
+  </div>
+  <p id="msg" style="color:#b3261e;min-height:1.4em;margin:8px 0 0" role="alert"></p>
+  <div class="tools">
+    <label>Filtrar por color</label>
+    <div id="legend"></div>
+    <div class="row">
+      <button id="exp">Guardar copia (.json)</button>
+      <button id="imp">Combinar con archivo</button>
+      <button id="cfg">Configurar Drive</button>
+      <input type="file" id="file" accept=".json,application/json" hidden>
+    </div>
+  </div>
+</aside>
+
+<main><div id="board" class="board"></div></main>
+
+<dialog id="dlg">
+  <h2>Sincronizar con Google Drive</h2>
+  <p id="origin"></p>
+  <label for="cid">ID de cliente de Google (termina en .apps.googleusercontent.com)</label>
+  <input type="text" id="cid" autocomplete="off" spellcheck="false">
+  <p>Los eventos se guardan en un archivo llamado linea_del_tiempo.json en tu Drive. Mientras uses el mismo ID de cliente, el celular y la computadora comparten ese archivo.</p>
+  <div class="row">
+    <button class="main" id="conn">Guardar y conectar</button>
+    <button id="sy">Sincronizar ahora</button>
+    <button class="danger" id="disc">Desconectar</button>
+    <button id="close">Cerrar</button>
+  </div>
+</dialog>
+
+<script>
+const P = ["#c0392b","#d98a1c","#2e8b57","#1f78b4","#7b4fb5","#c2377d","#5d6b79"];
+const KEY = "ldt_v2", OLD = "linea_del_tiempo_v1", CFG = "ldt_cfg";
+const $ = id => document.getElementById(id);
+const now = () => Date.now() / 1000;
+const uid = () => (crypto.randomUUID ? crypto.randomUUID().replace(/-/g, "") : Math.random().toString(36).slice(2) + Date.now().toString(36));
+const norm = s => String(s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const sig = l => JSON.stringify([...l].sort((a, b) => a.id < b.id ? -1 : 1));
+
+function clean(e) {
+  return { id: String(e.id || uid()), year: parseInt(e.year, 10), title: String(e.title || ""), text: String(e.text || ""),
+    color: /^#[0-9a-f]{6}$/i.test(e.color) ? e.color : P[3], created: +e.created || 0, updated: +e.updated || 0, deleted: !!e.deleted };
+}
+function toList(j) {
+  const a = Array.isArray(j) ? j : j && j.events;
+  if (!Array.isArray(a)) throw new Error("formato");
+  return a.map(clean).filter(e => Number.isInteger(e.year));
+}
+function merge(a, b) {
+  const m = new Map(a.map(e => [e.id, e]));
+  b.forEach(e => { const x = m.get(e.id); if (!x || e.updated > x.updated) m.set(e.id, e); });
+  return [...m.values()];
+}
+function load() {
+  try { const d = JSON.parse(localStorage.getItem(KEY)); if (d) return toList(d); } catch (e) {}
+  try {
+    const o = JSON.parse(localStorage.getItem(OLD)), t = now();
+    if (Array.isArray(o)) return o.map((e, i) => clean({ ...e, created: t + i / 1000, updated: t }));
+  } catch (e) {}
+  return [];
+}
+let data = load(), editing = null, color = P[3], filter = null, hits = [], cur = -1;
+const persist = () => { try { localStorage.setItem(KEY, JSON.stringify({ version: 1, events: data })); } catch (e) {} };
+const save_ = () => { persist(); queueSync(); };
+const vis = () => data.filter(e => !e.deleted).sort((a, b) => a.year - b.year || a.created - b.created);
+
+/* ---------- línea del tiempo ---------- */
+function swatches() {
+  const sw = $("sw");
+  sw.innerHTML = P.map(c => `<button type="button" style="background:${c}" data-c="${c}" aria-label="Color ${c}" aria-pressed="${c === color}"></button>`).join("") + `<input type="color" id="custom" value="${color}" aria-label="Color personalizado">`;
+  sw.querySelectorAll("button").forEach(b => b.onclick = () => { color = b.dataset.c; swatches(); });
+  $("custom").oninput = e => { color = e.target.value; sw.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", "false")); };
+}
+function render() {
+  const list = vis().filter(e => !filter || e.color === filter), board = $("board");
+  if (!list.length) {
+    board.innerHTML = `<div class="empty"><h2 style="font:600 18px Georgia,serif;color:var(--ink)">Tu línea del tiempo está vacía</h2><p>Escribe un año, un título y lo que pasó. El primer evento marca el inicio de la línea y cada evento nuevo la amplía.</p></div>`;
+    $("range").textContent = "";
+  } else {
+    const g = new Map();
+    list.forEach(e => { if (!g.has(e.year)) g.set(e.year, []); g.get(e.year).push(e); });
+    const ys = [...g.keys()];
+    $("range").textContent = `${ys[0]} → ${ys[ys.length - 1]} · ${list.length} ${list.length === 1 ? "evento" : "eventos"}`;
+    board.innerHTML = ys.map((y, i) => `<section class="col${i === 0 ? " first" : ""}${i === ys.length - 1 ? " last" : ""}"><span class="dot"></span><div class="yr">${y}</div>${g.get(y).map(e => `<article class="card" tabindex="0" data-id="${e.id}" style="--c:${e.color}"><h3>${esc(e.title)}</h3><p>${esc(e.text)}</p></article>`).join("")}</section>`).join("");
+  }
+  legend();
+  search(false);
+}
+$("board").addEventListener("click", ev => { const c = ev.target.closest(".card"); if (c) edit(c.dataset.id); });
+$("board").addEventListener("keydown", ev => { const c = ev.target.closest(".card"); if (c && (ev.key === "Enter" || ev.key === " ")) { ev.preventDefault(); edit(c.dataset.id); } });
+
+function legend() {
+  const v = vis(), used = [...new Set(v.map(e => e.color))];
+  if (filter && !used.includes(filter)) filter = null;
+  $("legend").innerHTML = used.length ? used.map(c => `<button type="button" data-c="${c}" aria-pressed="${filter === c}"><i style="background:${c}"></i>${v.filter(e => e.color === c).length}</button>`).join("") : `<span style="color:var(--mute);font-size:13px">Aún no hay colores en uso.</span>`;
+  $("legend").querySelectorAll("button").forEach(b => b.onclick = () => { filter = filter === b.dataset.c ? null : b.dataset.c; render(); });
+}
+
+/* ---------- búsqueda ---------- */
+function search(jump) {
+  const terms = norm($("q").value).split(/\s+/).filter(Boolean);
+  hits = [];
+  document.querySelectorAll(".card").forEach(c => {
+    const e = data.find(x => x.id === c.dataset.id);
+    const ok = terms.length && terms.every(t => norm(e.year + " " + e.title + " " + e.text).includes(t));
+    c.classList.toggle("dim", terms.length > 0 && !ok);
+    c.classList.toggle("hit", !!ok);
+    c.classList.remove("cur");
+    if (ok) hits.push(c);
+  });
+  if (!terms.length) { $("count").textContent = ""; cur = -1; return; }
+  $("count").textContent = hits.length ? hits.length + (hits.length === 1 ? " resultado" : " resultados") : "Sin resultados";
+  if (jump && hits.length) go(0); else cur = -1;
+}
+function go(i) {
+  if (!hits.length) return;
+  cur = (i + hits.length) % hits.length;
+  hits.forEach(h => h.classList.remove("cur"));
+  hits[cur].classList.add("cur");
+  hits[cur].scrollIntoView({ behavior: "smooth", inline: "center", block: "center" });
+  $("count").textContent = `${cur + 1} de ${hits.length}`;
+}
+$("q").oninput = () => search(true);
+$("q").onkeydown = e => { if (e.key === "Enter") go(e.shiftKey ? cur - 1 : cur + 1); };
+$("next").onclick = () => go(cur + 1);
+$("prev").onclick = () => go(cur - 1);
+
+/* ---------- formulario ---------- */
+const drawer = open => document.body.classList.toggle("open", open);
+$("newb").onclick = () => { reset(); drawer(true); };
+$("x").onclick = () => drawer(false);
+function edit(id) {
+  const e = data.find(x => x.id === id && !x.deleted);
+  if (!e) return;
+  editing = id;
+  $("year").value = e.year; $("title").value = e.title; $("text").value = e.text;
+  color = e.color; swatches();
+  $("ftitle").textContent = "Editar evento";
+  $("save").textContent = "Guardar cambios";
+  $("cancel").hidden = false; $("del").hidden = false;
+  $("msg").textContent = "";
+  drawer(true);
+}
+function reset() {
+  editing = null;
+  $("year").value = ""; $("title").value = ""; $("text").value = "";
+  $("ftitle").textContent = "Nuevo evento";
+  $("save").textContent = "Agregar evento";
+  $("cancel").hidden = true; $("del").hidden = true;
+  $("msg").textContent = "";
+}
+$("cancel").onclick = () => { reset(); drawer(false); };
+$("save").onclick = () => {
+  const year = parseInt($("year").value, 10), title = $("title").value.trim(), text = $("text").value.trim();
+  if (Number.isNaN(year)) { $("msg").textContent = "Escribe el año como un número entero."; $("year").focus(); return; }
+  if (!title) { $("msg").textContent = "Escribe un título para el evento."; $("title").focus(); return; }
+  const t = now();
+  if (editing) Object.assign(data.find(x => x.id === editing), { year, title, text, color, updated: t });
+  else data.push({ id: uid(), year, title, text, color, created: t, updated: t, deleted: false });
+  save_(); reset(); render(); drawer(false);
+};
+$("del").onclick = () => {
+  if (!editing || !confirm("¿Eliminar este evento? No se puede deshacer.")) return;
+  Object.assign(data.find(x => x.id === editing), { deleted: true, text: "", updated: now() });
+  save_(); reset(); render(); drawer(false);
+};
+
+/* ---------- archivos ---------- */
+$("exp").onclick = () => {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify({ version: 1, events: data }, null, 2)], { type: "application/json" }));
+  a.download = "linea_del_tiempo.json"; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+$("imp").onclick = () => $("file").click();
+$("file").onchange = ev => {
+  const f = ev.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try { data = merge(data, toList(JSON.parse(r.result))); save_(); render(); $("msg").textContent = ""; }
+    catch (e) { $("msg").textContent = "El archivo no tiene el formato de una línea del tiempo."; }
+  };
+  r.readAsText(f); ev.target.value = "";
+};
+
+/* ---------- Google Drive ---------- */
+const cfg = () => { try { return JSON.parse(localStorage.getItem(CFG)) || {}; } catch (e) { return {}; } };
+const setCfg = o => { try { localStorage.setItem(CFG, JSON.stringify({ ...cfg(), ...o })); } catch (e) {} };
+let tok = null, fileId = null, syncing = false, again = false, timer = null;
+const status = t => { $("sync").textContent = t; };
+
+function loadGIS() {
+  return new Promise((ok, no) => {
+    if (window.google && google.accounts && google.accounts.oauth2) return ok();
+    const s = document.createElement("script");
+    s.src = "https://accounts.google.com/gsi/client"; s.onload = ok;
+    s.onerror = () => no(new Error("No se pudo cargar el acceso de Google. Revisa tu conexión."));
+    document.head.appendChild(s);
+  });
+}
+async function connect() {
+  const id = cfg().clientId;
+  if (!id) return openDlg();
+  try { await loadGIS(); } catch (e) { return status(e.message); }
+  const tc = google.accounts.oauth2.initTokenClient({
+    client_id: id, scope: "https://www.googleapis.com/auth/drive.file",
+    callback: r => { if (r.access_token) { tok = r.access_token; setCfg({ on: true }); sync(); } else status("Drive: no se concedió el acceso"); },
+    error_callback: () => status("Drive: conexión cancelada")
+  });
+  tc.requestAccessToken();
+}
+async function api(url, opt = {}) {
+  const r = await fetch(url, { ...opt, headers: { ...(opt.headers || {}), Authorization: "Bearer " + tok } });
+  if (r.status === 401) { tok = null; throw new Error("auth"); }
+  if (!r.ok) throw new Error("Drive " + r.status);
+  return r;
+}
+async function findFile() {
+  const q = encodeURIComponent("name='linea_del_tiempo.json' and trashed=false");
+  const j = await (await api(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id)&orderBy=createdTime&pageSize=1`)).json();
+  return j.files[0] ? j.files[0].id : null;
+}
+async function put(body) {
+  if (!fileId) {
+    const b = "ldtbound", meta = JSON.stringify({ name: "linea_del_tiempo.json", mimeType: "application/json" });
+    const mp = `--${b}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${meta}\r\n--${b}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${body}\r\n--${b}--`;
+    const r = await api("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id", { method: "POST", headers: { "Content-Type": "multipart/related; boundary=" + b }, body: mp });
+    fileId = (await r.json()).id;
+  } else {
+    await api(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body });
+  }
+}
+async function sync() {
+  if (!tok) return;
+  if (syncing) { again = true; return; }
+  syncing = true; status("Drive: sincronizando…");
+  try {
+    if (!fileId) fileId = await findFile();
+    let remote = [];
+    if (fileId) remote = toList(await (await api(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`)).json());
+    const merged = merge(data, remote);
+    const localNew = sig(merged) !== sig(data), remoteNew = !fileId || sig(merged) !== sig(remote);
+    data = merged;
+    if (remoteNew) await put(JSON.stringify({ version: 1, events: data }));
+    if (localNew) { persist(); render(); }
+    status("Drive: sincronizado " + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+  } catch (e) {
+    status(e.message === "auth" ? "Drive: toca ☁ para reconectar" : "Drive: error, se reintentará");
+  } finally {
+    syncing = false;
+    if (again) { again = false; queueSync(); }
+  }
+}
+function queueSync() { clearTimeout(timer); if (tok) timer = setTimeout(sync, 1200); }
+setInterval(() => { if (tok && !document.hidden) sync(); }, 30000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) sync(); });
+
+function openDlg() {
+  $("cid").value = cfg().clientId || "";
+  $("origin").textContent = location.protocol === "file:"
+    ? "Esta página está abierta como archivo local; Drive solo funciona cuando la página se abre desde una dirección https:// (por ejemplo, GitHub Pages)."
+    : "Dirección de esta página (debe estar registrada en Google): " + location.origin;
+  $("dlg").showModal();
+}
+$("cloud").onclick = () => (cfg().clientId ? (tok ? sync() : connect()) : openDlg());
+$("cfg").onclick = openDlg;
+$("close").onclick = () => $("dlg").close();
+$("conn").onclick = () => { setCfg({ clientId: $("cid").value.trim() }); $("dlg").close(); connect(); };
+$("sy").onclick = () => { $("dlg").close(); tok ? sync() : connect(); };
+$("disc").onclick = () => {
+  if (tok && window.google) try { google.accounts.oauth2.revoke(tok); } catch (e) {}
+  tok = null; fileId = null; setCfg({ on: false }); status("Drive: sin conectar"); $("dlg").close();
+};
+
+swatches(); render();
+status(cfg().on ? "Drive: toca ☁ para conectar" : "Drive: sin conectar");
+</script>
+</body>
+</html>
