@@ -5,335 +5,439 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Línea del tiempo</title>
 <style>
-:root{--bg:#e9eef2;--panel:#f8fafb;--ink:#17222d;--mute:#5d6b79;--line:#1f4e5f;--rule:#c9d3db;--card:#fff;--accent:#1f4e5f}
-@media (prefers-color-scheme:dark){:root{--bg:#10171d;--panel:#18222b;--ink:#e6edf2;--mute:#92a1ae;--line:#6fb3c9;--rule:#2b3a46;--card:#1d2933;--accent:#6fb3c9}}
-*{box-sizing:border-box}
-html,body{height:100%;margin:0}
-body{background:var(--bg);color:var(--ink);font:15px/1.5 "Segoe UI",system-ui,sans-serif;display:grid;grid-template-columns:310px 1fr;grid-template-rows:auto 1fr}
-header{grid-column:1/3;display:flex;gap:10px 14px;align-items:center;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--rule);flex-wrap:wrap}
-h1{font:600 21px Georgia,"Iowan Old Style",serif;margin:0;margin-right:auto}
-#range,#sync{color:var(--mute);font-size:13px}
-.search{display:flex;gap:6px;align-items:center;flex:1 1 280px;max-width:520px}
-.search input{flex:1;min-width:0}
-input,textarea,button{font:inherit;color:inherit}
-input[type=text],input[type=number],input[type=search],textarea{width:100%;padding:8px 10px;border:1px solid var(--rule);border-radius:6px;background:var(--card)}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-button{padding:8px 14px;border:1px solid var(--rule);border-radius:6px;background:var(--card);cursor:pointer}
-button:hover{border-color:var(--accent)}
-button.main{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:600}
-button.danger{color:#b3261e}
-#count{color:var(--mute);min-width:84px;font-size:13px}
-#newb,#x{display:none}
-aside{padding:18px 20px;background:var(--panel);border-right:1px solid var(--rule);overflow:auto}
-aside h2{font:600 16px Georgia,serif;margin:0 0 12px}
-label{display:block;margin:12px 0 4px;color:var(--mute);font-size:13px}
-textarea{min-height:130px;resize:vertical}
-.sw{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.sw button{width:32px;height:32px;padding:0;border-radius:50%;border:2px solid transparent}
-.sw button[aria-pressed=true]{border-color:var(--ink);box-shadow:0 0 0 2px var(--panel) inset}
-.sw input[type=color]{width:36px;height:32px;padding:0;border:1px solid var(--rule);border-radius:6px;background:none}
-.row{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
-.tools{margin-top:22px;padding-top:14px;border-top:1px solid var(--rule)}
-#legend{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-#legend button{padding:3px 10px;font-size:13px;border-radius:99px;display:flex;gap:6px;align-items:center}
-#legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
-#legend button[aria-pressed=true]{border-color:var(--ink);font-weight:600}
-main{overflow:auto;padding:24px 16px 40px}
-.board{display:flex;min-width:max-content}
-.col{width:250px;flex:none;position:relative;padding-top:46px}
-.col::before{content:"";position:absolute;top:13px;left:0;right:0;height:4px;background:var(--line)}
-.col.first::before{left:50%}.col.last::before{right:50%}.col.first.last::before{display:none}
-.col .dot{position:absolute;top:6px;left:50%;width:18px;height:18px;margin-left:-9px;border-radius:50%;background:var(--bg);border:4px solid var(--line)}
-.col .yr{position:absolute;top:-14px;left:0;right:0;text-align:center;font:700 19px Georgia,serif;font-variant-numeric:tabular-nums}
-.card{position:relative;z-index:1;margin:0 10px 12px;padding:10px 12px 11px;background:var(--card);border:1px solid var(--rule);border-left:7px solid var(--c);border-radius:8px;cursor:pointer;transition:opacity .15s}
-.card h3{margin:0 0 4px;font:600 15px/1.3 Georgia,serif}
-.card p{margin:0;color:var(--mute);font-size:13.5px;white-space:pre-wrap;overflow-wrap:anywhere}
-.card.dim{opacity:.22}
-.card.hit{box-shadow:0 0 0 3px var(--c)}
-.card.cur{box-shadow:0 0 0 3px var(--ink)}
-.empty{max-width:420px;margin:60px auto;text-align:center;color:var(--mute)}
-dialog{border:1px solid var(--rule);border-radius:10px;background:var(--panel);color:var(--ink);width:min(480px,92vw);padding:18px 20px}
-dialog h2{font:600 17px Georgia,serif;margin:0 0 8px}
-dialog p{margin:6px 0;color:var(--mute);font-size:13.5px;overflow-wrap:anywhere}
-@media(max-width:800px){
-  body{grid-template-columns:1fr;grid-template-rows:auto 1fr}
-  header{grid-column:1}
-  #newb{display:inline-block}
-  aside{display:none;position:fixed;inset:0;z-index:20;border:0}
-  body.open aside{display:block}
-  #x{display:inline-block;float:right}
+:root{
+  --bg:#f4f5f7; --panel:#ffffff; --text:#1d2330; --muted:#667085; --line:#b8bfcc; --border:#dde1e8; --accent:#2f6fed;
 }
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#14171f; --panel:#1d2230; --text:#e8ebf2; --muted:#9aa3b5; --line:#4a5368; --border:#2e3547; --accent:#6d9bff; }
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column}
+header{background:var(--panel);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+header h1{font-size:18px;margin:0 8px 0 0}
+header .grow{flex:1;min-width:160px;display:flex;gap:6px;align-items:center}
+input,select,textarea,button{font:inherit;color:var(--text)}
+input,select,textarea{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;width:100%}
+button{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:8px 12px;cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.danger{color:#d92d20;border-color:#d92d20}
+button:hover{filter:brightness(.96)}
+label.chk{display:flex;gap:4px;align-items:center;font-size:13px;color:var(--muted);white-space:nowrap}
+label.chk input{width:auto}
+#status{font-size:12px;color:var(--muted);padding:4px 14px;background:var(--panel);border-bottom:1px solid var(--border);min-height:24px}
+main{flex:1;min-height:0;overflow:auto;padding:14px}
+.empty{color:var(--muted);text-align:center;margin-top:60px}
+
+/* ===== Línea horizontal (PC) ===== */
+.tl{display:flex;align-items:stretch;min-height:100%;width:max-content;min-width:100%}
+.item{display:flex;flex-direction:column;width:215px;flex:none;position:relative}
+.item .top{order:1;display:flex;align-items:flex-end;flex:1;padding:0 6px 6px}
+.item .axis{order:2;height:58px;position:relative}
+.item .bottom{order:3;display:flex;align-items:flex-start;flex:1;padding:6px 6px 0}
+.axis::before{content:"";position:absolute;left:0;right:0;top:36px;height:3px;background:var(--line)}
+.item:first-child .axis::before{left:50%}
+.item:last-child .axis::before{right:50%}
+.dot{position:absolute;left:50%;top:37.5px;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;border:3px solid var(--panel);box-shadow:0 0 0 2px var(--line)}
+.yr{position:absolute;left:0;right:0;top:6px;text-align:center;font-size:12px;font-weight:700;color:var(--muted)}
+
+/* ===== Tarjeta ===== */
+.card{width:100%;background:var(--panel);border:1px solid var(--border);border-left:5px solid var(--c,#4f8cff);border-radius:10px;padding:8px 10px;cursor:pointer;text-align:left;transition:opacity .15s,transform .1s}
+.card:hover{transform:translateY(-2px)}
+.card .d{font-size:11.5px;font-weight:700;color:var(--c,#4f8cff)}
+.card .t{font-weight:700;font-size:14px;margin:2px 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.card .p{font-size:12.5px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.card.dim{opacity:.25}
+.card.hit{box-shadow:0 0 0 3px var(--accent)}
+
+/* ===== Línea vertical (móvil) ===== */
+@media (max-width:700px){
+  main{padding:10px 8px}
+  .tl{display:block;width:100%;min-width:0}
+  .item{display:grid;grid-template-columns:58px 1fr;width:100%}
+  .item .axis{grid-column:1;grid-row:1 / span 2;height:auto;order:0}
+  .item .top,.item .bottom{grid-column:2;order:0;display:block;padding:6px 0 6px 4px;flex:none}
+  .item .top:empty,.item .bottom:empty{display:none}
+  .axis::before{left:35px;right:auto;top:0;bottom:0;width:3px;height:auto}
+  .item:first-child .axis::before{left:35px;top:24px}
+  .item:last-child .axis::before{right:auto;bottom:calc(100% - 24px)}
+  .dot{left:36px;top:24px}
+  .yr{left:0;right:auto;width:30px;top:38px;font-size:10.5px;text-align:center;line-height:1.1;word-break:break-all}
+  header h1{width:100%}
+}
+
+/* ===== Diálogos ===== */
+dialog{border:1px solid var(--border);border-radius:14px;background:var(--panel);color:var(--text);padding:0;width:min(560px,94vw);max-height:92vh}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+.dlg{padding:16px;display:flex;flex-direction:column;gap:10px;max-height:90vh;overflow:auto}
+.dlg h2{margin:0;font-size:18px;overflow-wrap:anywhere}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.lbl{font-size:12px;color:var(--muted);margin-bottom:3px;display:block}
+.full{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5}
+.btns{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.sw{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.sw button{width:30px;height:30px;padding:0;border-radius:50%;border:3px solid transparent}
+.sw button.on{border-color:var(--text)}
+.sw input[type=color]{width:38px;height:30px;padding:0;border-radius:8px}
+.err{color:#d92d20;font-size:13px;min-height:16px}
+small.hint{color:var(--muted)}
 </style>
 </head>
 <body>
 <header>
-  <h1>Línea del tiempo</h1>
-  <span id="range"></span>
-  <div class="search" role="search">
-    <input type="search" id="q" placeholder="Buscar por palabras clave" aria-label="Buscar eventos">
-    <button id="prev" aria-label="Resultado anterior">▲</button>
-    <button id="next" aria-label="Resultado siguiente">▼</button>
-    <span id="count" aria-live="polite"></span>
+  <h1>🕰️ Línea del tiempo</h1>
+  <div class="grow">
+    <input id="q" type="search" placeholder="Buscar por palabras clave…" autocomplete="off">
+    <label class="chk"><input type="checkbox" id="onlyHits"> solo coincidencias</label>
   </div>
-  <button id="cloud">☁ Drive</button>
-  <span id="sync"></span>
-  <button class="main" id="newb">＋ Evento</button>
+  <button class="primary" id="btnAdd">+ Evento</button>
+  <button id="btnSync">☁️ Sincronizar</button>
 </header>
+<div id="status"></div>
+<main id="main"></main>
 
-<aside>
-  <button id="x" aria-label="Cerrar formulario">✕</button>
-  <h2 id="ftitle">Nuevo evento</h2>
-  <label for="year">Año (número negativo para a. C.)</label>
-  <input type="number" id="year" step="1" inputmode="numeric" placeholder="Ej. 1492">
-  <label for="title">Título</label>
-  <input type="text" id="title" maxlength="80" placeholder="Ej. Llegada a América">
-  <label for="text">Qué pasó</label>
-  <textarea id="text" placeholder="Describe el hecho importante"></textarea>
-  <label>Color del tema</label>
-  <div class="sw" id="sw"></div>
+<!-- Ver evento -->
+<dialog id="dView"><div class="dlg">
+  <div id="vDate" style="font-weight:700"></div>
+  <h2 id="vTitle"></h2>
+  <div class="full" id="vText"></div>
+  <div class="btns">
+    <button class="danger" id="vDel">Eliminar</button>
+    <button id="vEdit">Editar</button>
+    <button id="vClose">Cerrar</button>
+  </div>
+</div></dialog>
+
+<!-- Crear / editar -->
+<dialog id="dForm"><div class="dlg">
+  <h2 id="fHead">Nuevo evento</h2>
   <div class="row">
-    <button class="main" id="save">Agregar evento</button>
-    <button id="cancel" hidden>Cancelar</button>
-    <button class="danger" id="del" hidden>Eliminar</button>
+    <div><span class="lbl">Día (opcional)</span><input id="fDay" type="number" min="1" max="31" inputmode="numeric" placeholder="—"></div>
+    <div><span class="lbl">Mes (opcional)</span>
+      <select id="fMonth"><option value="0">—</option></select></div>
+    <div><span class="lbl">Año *</span><input id="fYear" type="number" inputmode="numeric" placeholder="1990"></div>
   </div>
-  <p id="msg" style="color:#b3261e;min-height:1.4em;margin:8px 0 0" role="alert"></p>
-  <div class="tools">
-    <label>Filtrar por color</label>
-    <div id="legend"></div>
-    <div class="row">
-      <button id="exp">Guardar copia (.json)</button>
-      <button id="imp">Combinar con archivo</button>
-      <button id="cfg">Configurar Drive</button>
-      <input type="file" id="file" accept=".json,application/json" hidden>
-    </div>
-  </div>
-</aside>
+  <small class="hint">Años antes de Cristo: usa número negativo (ej. -500). Día y mes pueden quedar vacíos.</small>
+  <div><span class="lbl">Título *</span><input id="fTitle" maxlength="140"></div>
+  <div><span class="lbl">¿Qué ocurrió?</span><textarea id="fText" rows="6"></textarea></div>
+  <div><span class="lbl">Color del tema</span><div class="sw" id="fColors"></div></div>
+  <div class="err" id="fErr"></div>
+  <div class="btns"><button id="fCancel">Cancelar</button><button class="primary" id="fSave">Guardar</button></div>
+</div></dialog>
 
-<main><div id="board" class="board"></div></main>
-
-<dialog id="dlg">
-  <h2>Sincronizar con Google Drive</h2>
-  <p>Pega la dirección de tu aplicación de Apps Script (termina en /exec) y la clave que escribiste en el código. Tus eventos se guardan en el archivo linea_del_tiempo.json de tu Drive. Usa la misma dirección y la misma clave en todos tus aparatos.</p>
-  <label for="url">Dirección de la aplicación web</label>
-  <input type="text" id="url" autocomplete="off" spellcheck="false" placeholder="https://script.google.com/macros/s/…/exec">
-  <label for="clave">Clave</label>
-  <input type="text" id="clave" autocomplete="off" spellcheck="false">
-  <p id="dmsg" style="color:#b3261e;min-height:1.2em" role="alert"></p>
-  <div class="row">
-    <button class="main" id="conn">Guardar y conectar</button>
-    <button id="sy">Sincronizar ahora</button>
-    <button class="danger" id="disc">Desconectar</button>
-    <button id="close">Cerrar</button>
+<!-- Sincronización -->
+<dialog id="dSync"><div class="dlg">
+  <h2>Sincronización con Google Drive</h2>
+  <div><span class="lbl">URL de la aplicación web (termina en /exec)</span><input id="sUrl" placeholder="https://script.google.com/macros/s/…/exec"></div>
+  <div><span class="lbl">Clave (déjala vacía si ya va incluida en la URL)</span><input id="sKey" type="password" autocomplete="off"></div>
+  <div class="btns">
+    <button id="sPull">⬇ Cargar de Drive</button>
+    <button id="sPush">⬆ Subir a Drive</button>
   </div>
-</dialog>
+  <hr style="width:100%;border:0;border-top:1px solid var(--border)">
+  <div class="btns">
+    <button id="sExport">Exportar copia (.json)</button>
+    <button id="sImport">Importar copia</button>
+    <input type="file" id="sFile" accept=".json,application/json" hidden>
+  </div>
+  <div class="err" id="sMsg" style="color:var(--muted)"></div>
+  <div class="btns"><button class="primary" id="sClose">Listo</button></div>
+</div></dialog>
 
 <script>
-const P = ["#c0392b","#d98a1c","#2e8b57","#1f78b4","#7b4fb5","#c2377d","#5d6b79"];
-const KEY = "ldt_v2", OLD = "linea_del_tiempo_v1", CFG = "ldt_cfg";
-const $ = id => document.getElementById(id);
-const now = () => Date.now() / 1000;
-const uid = () => (crypto.randomUUID ? crypto.randomUUID().replace(/-/g, "") : Math.random().toString(36).slice(2) + Date.now().toString(36));
-const norm = s => String(s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const sig = l => JSON.stringify([...l].sort((a, b) => a.id < b.id ? -1 : 1));
+(() => {
+  const $ = s => document.querySelector(s);
+  const LS = 'ldt_v2';
+  const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const MESES_LARGO = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const PALETA = ['#4f8cff','#e5484d','#30a46c','#f5a524','#8e4ec6','#12a594','#e93d82','#7a6f5d'];
 
-function clean(e) {
-  return { id: String(e.id || uid()), year: parseInt(e.year, 10), title: String(e.title || ""), text: String(e.text || ""),
-    color: /^#[0-9a-f]{6}$/i.test(e.color) ? e.color : P[3], created: +e.created || 0, updated: +e.updated || 0, deleted: !!e.deleted };
-}
-function toList(j) {
-  const a = Array.isArray(j) ? j : j && j.events;
-  if (!Array.isArray(a)) throw new Error("formato");
-  return a.map(clean).filter(e => Number.isInteger(e.year));
-}
-function merge(a, b) {
-  const m = new Map(a.map(e => [e.id, e]));
-  b.forEach(e => { const x = m.get(e.id); if (!x || e.updated > x.updated) m.set(e.id, e); });
-  return [...m.values()];
-}
-function load() {
-  try { const d = JSON.parse(localStorage.getItem(KEY)); if (d) return toList(d); } catch (e) {}
-  try {
-    const o = JSON.parse(localStorage.getItem(OLD)), t = now();
-    if (Array.isArray(o)) return o.map((e, i) => clean({ ...e, created: t + i / 1000, updated: t }));
-  } catch (e) {}
-  return [];
-}
-let data = load(), editing = null, color = P[3], filter = null, hits = [], cur = -1;
-const persist = () => { try { localStorage.setItem(KEY, JSON.stringify({ version: 1, events: data })); } catch (e) {} };
-const save_ = () => { persist(); queueSync(); };
-const vis = () => data.filter(e => !e.deleted).sort((a, b) => a.year - b.year || a.created - b.created);
+  let S = { events: [], url: '', key: '' };
+  let editingId = null, viewingId = null, color = PALETA[0], pushTimer = null;
 
-/* ---------- línea del tiempo ---------- */
-function swatches() {
-  const sw = $("sw");
-  sw.innerHTML = P.map(c => `<button type="button" style="background:${c}" data-c="${c}" aria-label="Color ${c}" aria-pressed="${c === color}"></button>`).join("") + `<input type="color" id="custom" value="${color}" aria-label="Color personalizado">`;
-  sw.querySelectorAll("button").forEach(b => b.onclick = () => { color = b.dataset.c; swatches(); });
-  $("custom").oninput = e => { color = e.target.value; sw.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", "false")); };
-}
-function render() {
-  const list = vis().filter(e => !filter || e.color === filter), board = $("board");
-  if (!list.length) {
-    board.innerHTML = `<div class="empty"><h2 style="font:600 18px Georgia,serif;color:var(--ink)">Tu línea del tiempo está vacía</h2><p>Escribe un año, un título y lo que pasó. El primer evento marca el inicio de la línea y cada evento nuevo la amplía.</p></div>`;
-    $("range").textContent = "";
-  } else {
-    const g = new Map();
-    list.forEach(e => { if (!g.has(e.year)) g.set(e.year, []); g.get(e.year).push(e); });
-    const ys = [...g.keys()];
-    $("range").textContent = `${ys[0]} → ${ys[ys.length - 1]} · ${list.length} ${list.length === 1 ? "evento" : "eventos"}`;
-    board.innerHTML = ys.map((y, i) => `<section class="col${i === 0 ? " first" : ""}${i === ys.length - 1 ? " last" : ""}"><span class="dot"></span><div class="yr">${y}</div>${g.get(y).map(e => `<article class="card" tabindex="0" data-id="${e.id}" style="--c:${e.color}"><h3>${esc(e.title)}</h3><p>${esc(e.text)}</p></article>`).join("")}</section>`).join("");
+  /* ---------- utilidades ---------- */
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  const norm = s => (s || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const num = v => { const n = parseInt(v, 10); return Number.isFinite(n) ? n : 0; };
+
+  function normalize(e) {
+    return {
+      id: e.id || uid(),
+      year: num(e.year ?? e.anio ?? e['año']),
+      month: num(e.month ?? e.mes),
+      day: num(e.day ?? e.dia ?? e['día']),
+      title: String(e.title ?? e.titulo ?? e['título'] ?? ''),
+      text: String(e.text ?? e.texto ?? e.description ?? ''),
+      color: e.color || PALETA[0],
+      created: e.created || Date.now()
+    };
   }
-  legend();
-  search(false);
-}
-$("board").addEventListener("click", ev => { const c = ev.target.closest(".card"); if (c) edit(c.dataset.id); });
-$("board").addEventListener("keydown", ev => { const c = ev.target.closest(".card"); if (c && (ev.key === "Enter" || ev.key === " ")) { ev.preventDefault(); edit(c.dataset.id); } });
+  function fmtDate(e, long) {
+    const y = e.year < 0 ? `${-e.year} a. C.` : `${e.year}`;
+    const m = e.month ? (long ? MESES_LARGO : MESES)[e.month - 1] : '';
+    if (e.day && e.month) return `${e.day} ${long ? 'de ' : ''}${m}${long ? ' de ' : ' '}${y}`;
+    if (e.month) return `${m} ${long ? 'de ' : ''}${y}`;
+    return y;
+  }
+  const cmp = (a, b) =>
+    a.year - b.year || a.month - b.month || a.day - b.day || a.created - b.created;
 
-function legend() {
-  const v = vis(), used = [...new Set(v.map(e => e.color))];
-  if (filter && !used.includes(filter)) filter = null;
-  $("legend").innerHTML = used.length ? used.map(c => `<button type="button" data-c="${c}" aria-pressed="${filter === c}"><i style="background:${c}"></i>${v.filter(e => e.color === c).length}</button>`).join("") : `<span style="color:var(--mute);font-size:13px">Aún no hay colores en uso.</span>`;
-  $("legend").querySelectorAll("button").forEach(b => b.onclick = () => { filter = filter === b.dataset.c ? null : b.dataset.c; render(); });
-}
+  function daysIn(m, y) {
+    if (m === 2) return (y % 4 === 0 && (y % 100 !== 0 || y % 400 === 0)) ? 29 : 28;
+    return [4, 6, 9, 11].includes(m) ? 30 : 31;
+  }
 
-/* ---------- búsqueda ---------- */
-function search(jump) {
-  const terms = norm($("q").value).split(/\s+/).filter(Boolean);
-  hits = [];
-  document.querySelectorAll(".card").forEach(c => {
-    const e = data.find(x => x.id === c.dataset.id);
-    const ok = terms.length && terms.every(t => norm(e.year + " " + e.title + " " + e.text).includes(t));
-    c.classList.toggle("dim", terms.length > 0 && !ok);
-    c.classList.toggle("hit", !!ok);
-    c.classList.remove("cur");
-    if (ok) hits.push(c);
-  });
-  if (!terms.length) { $("count").textContent = ""; cur = -1; return; }
-  $("count").textContent = hits.length ? hits.length + (hits.length === 1 ? " resultado" : " resultados") : "Sin resultados";
-  if (jump && hits.length) go(0); else cur = -1;
-}
-function go(i) {
-  if (!hits.length) return;
-  cur = (i + hits.length) % hits.length;
-  hits.forEach(h => h.classList.remove("cur"));
-  hits[cur].classList.add("cur");
-  hits[cur].scrollIntoView({ behavior: "smooth", inline: "center", block: "center" });
-  $("count").textContent = `${cur + 1} de ${hits.length}`;
-}
-$("q").oninput = () => search(true);
-$("q").onkeydown = e => { if (e.key === "Enter") go(e.shiftKey ? cur - 1 : cur + 1); };
-$("next").onclick = () => go(cur + 1);
-$("prev").onclick = () => go(cur - 1);
+  /* ---------- almacenamiento local ---------- */
+  function load() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(LS) || 'null');
+      if (raw) S = { events: (raw.events || []).map(normalize), url: raw.url || '', key: raw.key || '' };
+    } catch (_) {}
+  }
+  function saveLocal() {
+    try { localStorage.setItem(LS, JSON.stringify(S)); } catch (_) {}
+  }
+  function status(msg) { $('#status').textContent = msg || ''; }
 
-/* ---------- formulario ---------- */
-const drawer = open => document.body.classList.toggle("open", open);
-$("newb").onclick = () => { reset(); drawer(true); };
-$("x").onclick = () => drawer(false);
-function edit(id) {
-  const e = data.find(x => x.id === id && !x.deleted);
-  if (!e) return;
-  editing = id;
-  $("year").value = e.year; $("title").value = e.title; $("text").value = e.text;
-  color = e.color; swatches();
-  $("ftitle").textContent = "Editar evento";
-  $("save").textContent = "Guardar cambios";
-  $("cancel").hidden = false; $("del").hidden = false;
-  $("msg").textContent = "";
-  drawer(true);
-}
-function reset() {
-  editing = null;
-  $("year").value = ""; $("title").value = ""; $("text").value = "";
-  $("ftitle").textContent = "Nuevo evento";
-  $("save").textContent = "Agregar evento";
-  $("cancel").hidden = true; $("del").hidden = true;
-  $("msg").textContent = "";
-}
-$("cancel").onclick = () => { reset(); drawer(false); };
-$("save").onclick = () => {
-  const year = parseInt($("year").value, 10), title = $("title").value.trim(), text = $("text").value.trim();
-  if (Number.isNaN(year)) { $("msg").textContent = "Escribe el año como un número entero."; $("year").focus(); return; }
-  if (!title) { $("msg").textContent = "Escribe un título para el evento."; $("title").focus(); return; }
-  const t = now();
-  if (editing) Object.assign(data.find(x => x.id === editing), { year, title, text, color, updated: t });
-  else data.push({ id: uid(), year, title, text, color, created: t, updated: t, deleted: false });
-  save_(); reset(); render(); drawer(false);
-};
-$("del").onclick = () => {
-  if (!editing || !confirm("¿Eliminar este evento? No se puede deshacer.")) return;
-  Object.assign(data.find(x => x.id === editing), { deleted: true, text: "", updated: now() });
-  save_(); reset(); render(); drawer(false);
-};
+  /* ---------- sincronización (Apps Script) ---------- */
+  const hasSync = () => !!S.url;
+  function getUrl() {
+    if (!S.key || /[?&](key|clave)=/.test(S.url)) return S.url;
+    return S.url + (S.url.includes('?') ? '&' : '?') + 'key=' + encodeURIComponent(S.key);
+  }
+  function getKey() {
+    if (S.key) return S.key;
+    try { const p = new URL(S.url).searchParams; return p.get('key') || p.get('clave') || ''; } catch (_) { return ''; }
+  }
+  async function pull(force) {
+    if (!hasSync()) return false;
+    status('Cargando desde Drive…');
+    try {
+      const r = await fetch(getUrl());
+      const j = await r.json();
+      if (!j.ok || !Array.isArray(j.events)) throw new Error(j.error || 'Respuesta inesperada');
+      if (j.events.length === 0 && S.events.length > 0 && !force) {
+        status('Drive estaba vacío; subiendo lo que hay en este dispositivo…');
+        return await push();
+      }
+      S.events = j.events.map(normalize);
+      saveLocal(); render();
+      status(`Sincronizado con Drive (${S.events.length} eventos).`);
+      return true;
+    } catch (err) {
+      status('No se pudo cargar de Drive: ' + err.message + ' (se usan los datos locales).');
+      return false;
+    }
+  }
+  async function push() {
+    if (!hasSync()) return false;
+    status('Guardando en Drive…');
+    try {
+      const r = await fetch(S.url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ key: getKey(), events: S.events })
+      });
+      const j = await r.json();
+      if (!j.ok) throw new Error(j.error || 'Respuesta inesperada');
+      status(`Guardado en Drive (${S.events.length} eventos).`);
+      return true;
+    } catch (err) {
+      status('No se pudo guardar en Drive: ' + err.message + ' (queda guardado en este dispositivo).');
+      return false;
+    }
+  }
+  function changed() {
+    saveLocal(); render();
+    if (hasSync()) { clearTimeout(pushTimer); pushTimer = setTimeout(push, 700); }
+  }
 
-/* ---------- archivos ---------- */
-$("exp").onclick = () => {
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([JSON.stringify({ version: 1, events: data }, null, 2)], { type: "application/json" }));
-  a.download = "linea_del_tiempo.json"; a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-};
-$("imp").onclick = () => $("file").click();
-$("file").onchange = ev => {
-  const f = ev.target.files[0]; if (!f) return;
-  const r = new FileReader();
-  r.onload = () => {
-    try { data = merge(data, toList(JSON.parse(r.result))); save_(); render(); $("msg").textContent = ""; }
-    catch (e) { $("msg").textContent = "El archivo no tiene el formato de una línea del tiempo."; }
+  /* ---------- búsqueda ---------- */
+  function matcher() {
+    const terms = norm($('#q').value).split(/\s+/).filter(Boolean);
+    if (!terms.length) return null;
+    return e => {
+      const hay = norm(`${e.title} ${e.text} ${fmtDate(e, true)} ${e.year}`);
+      return terms.every(t => hay.includes(t));
+    };
+  }
+
+  /* ---------- render ---------- */
+  function snippet(t) {
+    t = t.replace(/\s+/g, ' ').trim();
+    return t.length > 140 ? t.slice(0, 140).trimEnd() + '…' : t;
+  }
+  function render() {
+    const main = $('#main');
+    const m = matcher();
+    let list = [...S.events].sort(cmp);
+    if (m && $('#onlyHits').checked) list = list.filter(m);
+    if (!list.length) {
+      main.innerHTML = '';
+      const d = document.createElement('div');
+      d.className = 'empty';
+      d.textContent = S.events.length
+        ? 'Ningún evento coincide con la búsqueda.'
+        : 'Aún no hay eventos. Pulsa “+ Evento” para crear el primero.';
+      main.appendChild(d);
+      return;
+    }
+    const tl = document.createElement('div');
+    tl.className = 'tl';
+    let prevYear = null, firstHit = null;
+    list.forEach((e, i) => {
+      const item = document.createElement('div');
+      item.className = 'item';
+      const axis = document.createElement('div'); axis.className = 'axis';
+      const dot = document.createElement('i'); dot.className = 'dot'; dot.style.background = e.color;
+      axis.appendChild(dot);
+      if (e.year !== prevYear) {
+        const y = document.createElement('span'); y.className = 'yr';
+        y.textContent = e.year < 0 ? `${-e.year} a.C.` : e.year;
+        axis.appendChild(y);
+      }
+      prevYear = e.year;
+      const top = document.createElement('div'); top.className = 'top';
+      const bottom = document.createElement('div'); bottom.className = 'bottom';
+
+      const card = document.createElement('button');
+      card.className = 'card'; card.style.setProperty('--c', e.color);
+      card.type = 'button';
+      const d = document.createElement('div'); d.className = 'd'; d.textContent = fmtDate(e);
+      const t = document.createElement('div'); t.className = 't'; t.textContent = e.title || '(sin título)';
+      const p = document.createElement('div'); p.className = 'p'; p.textContent = snippet(e.text);
+      card.append(d, t, p);
+      card.addEventListener('click', () => openView(e.id));
+      if (m) { if (m(e)) { card.classList.add('hit'); firstHit = firstHit || card; } else card.classList.add('dim'); }
+
+      (i % 2 === 0 ? top : bottom).appendChild(card);
+      item.append(axis, top, bottom);
+      tl.appendChild(item);
+    });
+    main.innerHTML = '';
+    main.appendChild(tl);
+    if (m && firstHit && !$('#onlyHits').checked) firstHit.scrollIntoView({ block: 'center', inline: 'center', behavior: 'smooth' });
+  }
+
+  /* ---------- ver evento ---------- */
+  function openView(id) {
+    const e = S.events.find(x => x.id === id); if (!e) return;
+    viewingId = id;
+    $('#vDate').textContent = fmtDate(e, true);
+    $('#vDate').style.color = e.color;
+    $('#vTitle').textContent = e.title;
+    $('#vText').textContent = e.text || '(sin descripción)';
+    $('#dView').showModal();
+  }
+  $('#vClose').onclick = () => $('#dView').close();
+  $('#vEdit').onclick = () => { $('#dView').close(); openForm(viewingId); };
+  $('#vDel').onclick = () => {
+    if (!confirm('¿Eliminar este evento?')) return;
+    S.events = S.events.filter(x => x.id !== viewingId);
+    $('#dView').close(); changed();
   };
-  r.readAsText(f); ev.target.value = "";
-};
 
-/* ---------- Sincronización (Apps Script → tu Drive) ---------- */
-const cfg = () => { try { return JSON.parse(localStorage.getItem(CFG)) || {}; } catch (e) { return {}; } };
-const setCfg = o => { try { localStorage.setItem(CFG, JSON.stringify({ ...cfg(), ...o })); } catch (e) {} };
-const ready = () => !!(cfg().on && cfg().url && cfg().clave);
-const status = t => { $("sync").textContent = t; };
-let syncing = false, again = false, timer = null;
+  /* ---------- formulario ---------- */
+  const selM = $('#fMonth');
+  MESES_LARGO.forEach((n, i) => { const o = document.createElement('option'); o.value = i + 1; o.textContent = n; selM.appendChild(o); });
 
-async function sync() {
-  if (!ready()) return;
-  if (syncing) { again = true; return; }
-  syncing = true; status("Drive: sincronizando…");
-  try {
-    const r = await fetch(cfg().url, { method: "POST", body: JSON.stringify({ clave: cfg().clave, events: data }) });
-    let j;
-    try { j = JSON.parse(await r.text()); } catch (e) { throw new Error("url"); }
-    if (!j.ok) throw new Error(j.error === "clave" ? "clave" : "servidor");
-    const merged = merge(data, toList(j.events));
-    const changed = sig(merged) !== sig(data);
-    data = merged;
-    if (changed) { persist(); render(); }
-    status("Drive: sincronizado " + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
-  } catch (e) {
-    status(e.message === "clave" ? "Drive: la clave no coincide" : e.message === "url" ? "Drive: revisa la dirección y que el acceso sea «Cualquier persona»" : "Drive: sin conexión, se reintentará");
-  } finally {
-    syncing = false;
-    if (again) { again = false; queueSync(); }
+  function drawColors() {
+    const box = $('#fColors'); box.innerHTML = '';
+    PALETA.forEach(c => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.style.background = c;
+      if (c.toLowerCase() === color.toLowerCase()) b.classList.add('on');
+      b.onclick = () => { color = c; drawColors(); };
+      box.appendChild(b);
+    });
+    const ci = document.createElement('input'); ci.type = 'color'; ci.value = color;
+    ci.oninput = () => { color = ci.value; box.querySelectorAll('button').forEach(x => x.classList.remove('on')); };
+    box.appendChild(ci);
   }
-}
-function queueSync() { clearTimeout(timer); if (ready()) timer = setTimeout(sync, 1200); }
-setInterval(() => { if (!document.hidden) sync(); }, 30000);
-document.addEventListener("visibilitychange", () => { if (!document.hidden) sync(); });
-
-function openDlg() {
-  $("url").value = cfg().url || ""; $("clave").value = cfg().clave || ""; $("dmsg").textContent = "";
-  $("dlg").showModal();
-}
-$("cloud").onclick = () => (ready() ? sync() : openDlg());
-$("cfg").onclick = openDlg;
-$("close").onclick = () => $("dlg").close();
-$("conn").onclick = () => {
-  const url = $("url").value.trim(), clave = $("clave").value.trim();
-  if (!url.startsWith("https://script.google.com/") || !url.endsWith("/exec") || !clave) {
-    $("dmsg").textContent = "Pega la dirección completa (termina en /exec) y la clave."; return;
+  function openForm(id) {
+    editingId = id || null;
+    const e = id ? S.events.find(x => x.id === id) : null;
+    $('#fHead').textContent = e ? 'Editar evento' : 'Nuevo evento';
+    $('#fDay').value = e && e.day ? e.day : '';
+    $('#fMonth').value = e ? e.month : 0;
+    $('#fYear').value = e ? e.year : '';
+    $('#fTitle').value = e ? e.title : '';
+    $('#fText').value = e ? e.text : '';
+    color = e ? e.color : PALETA[0];
+    drawColors();
+    $('#fErr').textContent = '';
+    $('#dForm').showModal();
   }
-  setCfg({ url, clave, on: true }); $("dlg").close(); sync();
-};
-$("sy").onclick = () => { $("dlg").close(); sync(); };
-$("disc").onclick = () => { setCfg({ on: false }); status("Drive: sin conectar"); $("dlg").close(); };
+  $('#btnAdd').onclick = () => openForm(null);
+  $('#fCancel').onclick = () => $('#dForm').close();
+  $('#fSave').onclick = () => {
+    const yStr = $('#fYear').value.trim();
+    const year = parseInt(yStr, 10);
+    const month = num($('#fMonth').value);
+    const day = num($('#fDay').value);
+    const title = $('#fTitle').value.trim();
+    const err = m => { $('#fErr').textContent = m; };
+    if (!yStr || !Number.isFinite(year)) return err('El año es obligatorio.');
+    if (!title) return err('El título es obligatorio.');
+    if (day && !month) return err('Si indicas el día, elige también el mes.');
+    if (day && (day < 1 || day > daysIn(month, year))) return err(`Ese mes solo tiene ${daysIn(month, year)} días.`);
+    const data = { year, month, day, title, text: $('#fText').value, color };
+    if (editingId) {
+      const e = S.events.find(x => x.id === editingId);
+      Object.assign(e, data);
+    } else {
+      S.events.push(normalize({ ...data, id: uid(), created: Date.now() }));
+    }
+    $('#dForm').close(); changed();
+  };
 
-swatches(); render();
-if (ready()) sync(); else status("Drive: sin conectar");
+  /* ---------- sincronización: diálogo ---------- */
+  $('#btnSync').onclick = () => {
+    $('#sUrl').value = S.url; $('#sKey').value = S.key; $('#sMsg').textContent = '';
+    $('#dSync').showModal();
+  };
+  function readSyncFields() { S.url = $('#sUrl').value.trim(); S.key = $('#sKey').value.trim(); saveLocal(); }
+  $('#sPull').onclick = async () => {
+    readSyncFields();
+    if (!hasSync()) { $('#sMsg').textContent = 'Primero escribe la URL.'; return; }
+    if (S.events.length && !confirm('Esto reemplazará los eventos de este dispositivo con los de Drive. ¿Continuar?')) return;
+    const ok = await pull(true); $('#sMsg').textContent = $('#status').textContent;
+  };
+  $('#sPush').onclick = async () => {
+    readSyncFields();
+    if (!hasSync()) { $('#sMsg').textContent = 'Primero escribe la URL.'; return; }
+    await push(); $('#sMsg').textContent = $('#status').textContent;
+  };
+  $('#sClose').onclick = () => { readSyncFields(); $('#dSync').close(); };
+  $('#sExport').onclick = () => {
+    const blob = new Blob([JSON.stringify(S.events, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = 'linea-del-tiempo.json'; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  };
+  $('#sImport').onclick = () => $('#sFile').click();
+  $('#sFile').onchange = async ev => {
+    const f = ev.target.files[0]; if (!f) return;
+    try {
+      let arr = JSON.parse(await f.text());
+      if (!Array.isArray(arr)) arr = arr.events;
+      if (!Array.isArray(arr)) throw new Error('Formato no válido');
+      if (!confirm(`Se importarán ${arr.length} eventos y reemplazarán los actuales. ¿Continuar?`)) return;
+      S.events = arr.map(normalize); changed();
+      $('#sMsg').textContent = 'Copia importada.';
+    } catch (err) { $('#sMsg').textContent = 'No se pudo importar: ' + err.message; }
+    ev.target.value = '';
+  };
+
+  /* ---------- búsqueda: eventos ---------- */
+  $('#q').addEventListener('input', render);
+  $('#onlyHits').addEventListener('change', render);
+
+  /* ---------- inicio ---------- */
+  load(); render();
+  if (hasSync()) pull(false);
+})();
 </script>
 </body>
 </html>
